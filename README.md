@@ -53,6 +53,7 @@ res = as_dot_dict(
 )
 
 slog(f'Issues ({res.total} in total):', fg='green', bold=True)
+
 for issue in res.issues:
     line_color = 'red' if issue.fields.issuetype.name == 'Bug' else None
     slog(f' * [{issue.key}] [{issue.fields.issuetype.name}] [{issue.fields.status.name}] {issue.fields.summary}', fg=line_color)
@@ -76,7 +77,7 @@ and execute the script with devloop:
 ### Virtual env setup - `$requires`
 
 PyShrimp parses script header and looks for the `# $requires: ...` lines.
-Each should like can contain one or more pip-style requirements, for example:
+Each such line can contain one or more pip-style requirements, for example:
 
 ```python
 #!/usr/bin/env pyshrimp
@@ -98,7 +99,7 @@ pyshrimp new my-new-script.py
 ```
 
 <a href="https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6?autoplay=1">
-<img src="https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6.png" width="700" />
+<img src="https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6.png" width="830" />
 </a>
 
 The file created will contain skeleton of script. Script will have the executable mode set already.
@@ -316,7 +317,7 @@ The project is licensed under [MIT License](./LICENSE.txt) with exceptions liste
 
 Project license exceptions:
 
-1. The files in [docs/assets/img/logo](docs/assets/img/logo) directory
+1. The files in [docs/assets/img/logo](doc/assets/img/logo) directory
    are licensed under [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by/3.0/legalcode).
 
 ## Contributions
@@ -333,5 +334,5 @@ A: Probably yes. And maybe it will be split in the future. But for now it's more
 ## Credits
 
 - The logo was created using ["Shrimp" icon](https://thenounproject.com/elabans/collection/seafood/?i=541402)
-  created by ["elabans"](https://thenounproject.com/elabans/) and published 
+  created by ["elmars"](https://thenounproject.com/elabans/) and published 
   under [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by/3.0/us/legalcode).
