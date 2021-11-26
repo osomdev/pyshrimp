@@ -317,7 +317,7 @@ The project is licensed under [MIT License](./LICENSE.txt) with exceptions liste
 
 Project license exceptions:
 
-1. The files in [docs/assets/img/logo](doc/assets/img/logo) directory
+1. The files in [doc/assets/img/logo](doc/assets/img/logo) directory
    are licensed under [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by/3.0/legalcode).
 
 ## Contributions
