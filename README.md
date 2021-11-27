@@ -1,6 +1,6 @@
 # PyShrimp
 
-<img src="doc/assets/img/logo/pyshrimp_logo_transparent_250.png" align="right" alt="PyShrimp logo">
+<img src="https://osomdev.github.io/pyshrimp/assets/img/logo/pyshrimp_logo_transparent_250.png" align="right" alt="PyShrimp logo">
 
 PyShrimp is combination of utilities designed to support easy creation of small python scripts instead of getting your
 hands dirty with shell scripting languages like bash.
@@ -71,7 +71,7 @@ chmod +x thescript.py
 PyShrimp will automatically initialize new virtual environment, install dependencies declared in file header,
 and execute the script with devloop:
 
-![Showcase output](./doc/assets/img/pyshrimp_showcase_output.png)
+![Showcase output](https://osomdev.github.io/pyshrimp/assets/img/pyshrimp_showcase_output.png)
 
 ## Features
 
@@ -99,7 +99,7 @@ To quickly create new script just run the `new` command:
 pyshrimp new my-new-script.py
 ```
 
-[![](doc/assets/img/asciinema_script_creation_snapshot.png)](
+[![](https://osomdev.github.io/pyshrimp/assets/img/asciinema_script_creation_snapshot.png)](
   https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6?autoplay=1
 )
 
@@ -322,7 +322,7 @@ The project is licensed under [MIT License](./LICENSE.txt) with exceptions liste
 
 Project license exceptions:
 
-1. The files in [doc/assets/img/logo](doc/assets/img/logo) directory
+1. The files in [doc/assets/img/logo](doc/assets/img/logo) and [docs/assets/img/logo](doc/assets/img/logo) directory
    are licensed under [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by/3.0/legalcode).
 
 ## Contributions
