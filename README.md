@@ -56,7 +56,8 @@ slog(f'Issues ({res.total} in total):', fg='green', bold=True)
 
 for issue in res.issues:
     line_color = 'red' if issue.fields.issuetype.name == 'Bug' else None
-    slog(f' * [{issue.key}] [{issue.fields.issuetype.name}] [{issue.fields.status.name}] {issue.fields.summary}', fg=line_color)
+    f = issue.fields
+    slog(f' * [{issue.key}] [{f.issuetype.name}] [{f.status.name}] {f.summary}', fg=line_color)
 ```
 
 To run this script you need to have the PyShrimp installed:
@@ -291,10 +292,14 @@ produce diagnostic messages:
 % PYSHRIMP_LOG=1 ./show_recently_created_issues.py a b
 [PyShrimp:bootstrap] INFO: target: ./show_recently_created_issues.py
 [PyShrimp:bootstrap] INFO: args: ['a', 'b']
-[PyShrimp:bootstrap] INFO: Using requirements d82e6efbb5ea5ba895b6fe103b4c50bf3ac75eb3: ['pyshrimp', 'click==7.0']
+[PyShrimp:bootstrap] INFO: Using requirements d82e6efbb5ea5ba895b6fe103b4c50bf3ac75eb3: [
+  'pyshrimp', 'click==7.0'
+]
 [PyShrimp:bootstrap] INFO: Executing the script: [
-  '~/.cache/pyshrimp/virtual_envs/d82e6e.../bin/python', '-u', '-m', 'pyshrimp._internal.wrapper.magicwrapper', 
-  '--', './show_recently_created_issues.py', 'a', 'b']
+  '~/.cache/pyshrimp/virtual_envs/d82e6e.../bin/python', '-u', 
+  '-m', 'pyshrimp._internal.wrapper.magicwrapper', 
+  '--', './show_recently_created_issues.py', 'a', 'b'
+]
   
 Hello world
 ```
