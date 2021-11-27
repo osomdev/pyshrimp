@@ -1,6 +1,6 @@
 # PyShrimp
 
-![PyShrimp logo](doc/assets/img/logo/pyshrimp_logo_white_160.png)
+<img src="doc/assets/img/logo/pyshrimp_logo_transparent_250.png" align="right" alt="PyShrimp logo">
 
 PyShrimp is combination of utilities designed to support easy creation of small python scripts instead of getting your
 hands dirty with shell scripting languages like bash.
