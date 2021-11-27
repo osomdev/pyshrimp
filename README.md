@@ -99,9 +99,9 @@ To quickly create new script just run the `new` command:
 pyshrimp new my-new-script.py
 ```
 
-<a href="https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6?autoplay=1">
-<img src="https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6.png" width="830" />
-</a>
+[![](doc/assets/img/asciinema_script_creation_snapshot.png)](
+  https://asciinema.org/a/9dDyBs1n1YkNtJBchFv3yZCt6?autoplay=1
+)
 
 The file created will contain skeleton of script. Script will have the executable mode set already.
 
