@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Union
 
 _dot_dict_state_field_name = '_DotDict__dot_dict_state_d40de1e455ae'
 
@@ -79,6 +79,39 @@ class DotDict:
     def __setitem__(self, key, value):
         self.__setattr__(key, value)
 
+    def __len__(self):
+        return len(self.__dot_dict_state_d40de1e455ae.data)
+
+    def __eq__(self, other):
+        """
+        Compare DotDict instance with other object.
+        When two DotDicts are compared their data is compared.
+        When dot dict is compared with other type the data is compared with the other type.
+        The path is ignored by design.
+        """
+        if isinstance(other, DotDict):
+            return self.__dot_dict_state_d40de1e455ae.data == other.__dot_dict_state_d40de1e455ae.data
+        else:
+            return self.__dot_dict_state_d40de1e455ae.data == other
+
 
 def as_dot_dict(dict_data, variable_name='dict'):
+    """
+    Creates new DotDict instance
+    :param dict_data:
+    :param variable_name:
+    :return:
+    """
     return DotDict(dict_data, [(variable_name, '.')])
+
+
+def unwrap_dot_dict(wrapped_data: Union[DotDict, List]) -> Union[dict, List]:
+    if isinstance(wrapped_data, DotDict):
+        # noinspection PyProtectedMember
+        return wrapped_data._DotDict__dot_dict_state_d40de1e455ae.data
+
+    elif isinstance(wrapped_data, list):
+        return [unwrap_dot_dict(el) for el in wrapped_data]
+
+    else:
+        return wrapped_data

@@ -1,8 +1,9 @@
 import os
+import stat
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from pyshrimp import glob_ls
+from pyshrimp import glob_ls, write_to_file, read_file, read_file_bin, chmod_set, chmod_unset
 from pyshrimp.exception import IllegalArgumentException
 from pyshrimp.utils.filesystem import ls
 
@@ -15,6 +16,10 @@ def _make_file(dir_path, file_name):
     return path
 
 
+def _get_file_mode(file_path):
+    return os.stat(file_path).st_mode & 0o7777
+
+
 class Test(TestCase):
 
     def setUp(self) -> None:
@@ -23,7 +28,7 @@ class Test(TestCase):
         #   -> file2.txt
         #   -> c
         #      -> file3.py
-        self._temp_dir_obj = TemporaryDirectory('_pyshrimp_glob_ls_test')
+        self._temp_dir_obj = TemporaryDirectory('_pyshrimp_filesystem_test')
         self.temp_dir = self._temp_dir_obj.name
         self.dir_path_a = os.path.join(self.temp_dir, 'a')
         self.dir_path_b = os.path.join(self.temp_dir, 'a', 'b')
@@ -151,4 +156,65 @@ class Test(TestCase):
                 os.path.join(self.dir_path_a, '**', 'no-such-file'),
                 files_only=True
             )
+        )
+
+    def test_write_to_file_should_write_to_file_and_read_file_should_read_it_back(self):
+        file_path = os.path.join(self.dir_path_a, 'test_file_1.txt')
+        content = 'a\nb\nc'
+        write_to_file(file_path, content)
+        content_read = read_file(file_path)
+        self.assertEqual(content, content_read)
+
+    def test_write_and_read_file_should_work_fine_with_utf8_characters(self):
+        file_path = os.path.join(self.dir_path_a, 'test_file_1.txt')
+        content = '☕❤️'
+        write_to_file(file_path, content)
+        content_read = read_file(file_path)
+        self.assertEqual(content, content_read)
+
+    def test_write_to_file_should_write_to_file_with_binary_mode_and_read_file_bin_should_read_it_back(self):
+        file_path = os.path.join(self.dir_path_a, 'test_file_1.txt')
+        content = b'a\nb\nc'
+        write_to_file(file_path, content, open_mode='wb')
+        content_read = read_file_bin(file_path)
+        self.assertEqual(content, content_read)
+
+    def test_chmod_set_should_set_requested_flags(self):
+        # reset mode
+        os.chmod(self.file_path_1_b_f1_py, 0)
+        self.assertEqual(0, _get_file_mode(self.file_path_1_b_f1_py))
+
+        # set flag
+        chmod_set(self.file_path_1_b_f1_py, stat.S_IXUSR)
+        self.assertEqual(stat.S_IXUSR, _get_file_mode(self.file_path_1_b_f1_py))
+
+        # set another flag
+        chmod_set(self.file_path_1_b_f1_py, stat.S_IWGRP)
+        self.assertEqual(stat.S_IXUSR | stat.S_IWGRP, _get_file_mode(self.file_path_1_b_f1_py))
+
+    def test_chmod_unset_should_unset_requested_flags(self):
+        # set some flags
+        os.chmod(
+            self.file_path_1_b_f1_py,
+            stat.S_IRUSR | stat.S_IWUSR  # user: 6
+            | stat.S_IXGRP  # group: 1
+            | stat.S_IROTH  # other: 4
+        )
+        self.assertEqual(0o614, _get_file_mode(self.file_path_1_b_f1_py))
+
+        # remove flag
+        chmod_unset(self.file_path_1_b_f1_py, stat.S_IRUSR)
+        self.assertEqual(
+            stat.S_IWUSR  # user: 2
+            | stat.S_IXGRP  # group: 1
+            | stat.S_IROTH,  # other: 4
+            _get_file_mode(self.file_path_1_b_f1_py)
+        )
+
+        # remove another flag
+        chmod_unset(self.file_path_1_b_f1_py, stat.S_IROTH)
+        self.assertEqual(
+            stat.S_IWUSR  # user: 2
+            | stat.S_IXGRP,  # group: 1
+            _get_file_mode(self.file_path_1_b_f1_py)
         )

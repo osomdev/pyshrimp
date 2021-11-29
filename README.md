@@ -156,12 +156,17 @@ There are few useful utilities provided:
 
 * `as_dot_dict` - creates dictionary wrapper with support for property-like access 
   to the values: `as_dot_dict(d).some_key.some_list[1].some_value`
+* `unwrap_dot_dict` - un-wraps DotDicts back into the raw dict/list
 * `ls`, `glob_ls` - lists files and directories
+* `write_to_file`, `read_file`, `read_file_bin` - file content manipulation
+* `chmod_set`, `chmod_unset` - sets/unsets file mode bits
 * `acquire_file_lock`, `FileBasedLock` - handles file based locking
 * `re_match_all` - runs regular expression matching across the list and returns selected 
   group from the matched elements
 * `in_background` - runs function in background thread pool
 * [`StringWrapper`](src/pyshrimp/utils/string_wrapper.py) - provides few methods especially useful for parsing process output
+* `parse_table` - parses table-like output into `ParsedTable`
+* `create_regex_splitter` - creates `regex_splitter` - useful to handle unusual table/column-like output
 * `wait_until`, `wait_until_gen` - handles waiting for some result with timeout using periodic polling
 
 You can see example usage in [examples](examples) and also in [tests](tests).

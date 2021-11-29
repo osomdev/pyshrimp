@@ -1,6 +1,9 @@
 import re
 from typing import Union, List
 
+from pyshrimp.utils.splitter import Splitter, default_splitter
+from pyshrimp.utils.table_parser import parse_table
+
 
 class StringWrapper(str):
 
@@ -29,14 +32,17 @@ class StringWrapper(str):
             ] for m in match_list if m
         ]
 
-    def columns(self, *column_index, split_pattern=r'\s+', strip_before_split=True, include_empty_lines=False):
+    def columns(self, *column_index, splitter: Splitter = default_splitter, maxsplit=0):
         def _process_line(line):
-            if strip_before_split:
-                line = line.strip()
-
-            split_line = re.split(split_pattern, line)
-            return [(split_line[i:i + 1] or [None])[0] for i in column_index]
+            split_line = splitter(line, maxsplit=maxsplit)
+            if not column_index:
+                return split_line
+            else:
+                return [(split_line[i:i + 1] or [None])[0] for i in column_index]
 
         return [
-            _process_line(line) for line in self.lines(include_empty_lines)
+            _process_line(line) for line in self.lines(include_empty=False)
         ]
+
+    def parse_table(self, splitter: Splitter = default_splitter):
+        return parse_table(self.lines(include_empty=False), splitter)

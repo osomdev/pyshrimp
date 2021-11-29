@@ -88,7 +88,7 @@ def _cmd_generate(cmd, args):
 
         # make the script writable
         st = os.stat(new_script_path)
-        os.chmod(new_script_path, st.st_mode | stat.S_IEXEC)
+        os.chmod(new_script_path, st.st_mode | stat.S_IXUSR)
 
     else:
         print(script_content)
