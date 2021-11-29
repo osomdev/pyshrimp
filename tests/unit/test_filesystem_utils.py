@@ -36,8 +36,15 @@ class Test(TestCase):
     def tearDown(self) -> None:
         self._temp_dir_obj.cleanup()
 
-    def test_ls_should_list_files(self):
+    def assertEqualAfterSort(self, a, b, msg=None):
         self.assertEqual(
+            list(sorted(a)),
+            list(sorted(b)),
+            msg=msg
+        )
+
+    def test_ls_should_list_files(self):
+        self.assertEqualAfterSort(
             [self.file_path_1_b_f1_py, self.file_path_2_b_f2_txt],
             ls(
                 self.dir_path_b,
@@ -46,7 +53,7 @@ class Test(TestCase):
         )
 
     def test_ls_should_list_directories(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.dir_path_c],
             ls(
                 self.dir_path_b,
@@ -55,7 +62,7 @@ class Test(TestCase):
         )
 
     def test_ls_should_accept_path_segments(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.dir_path_c],
             ls(
                 self.dir_path_a, 'b',
@@ -86,7 +93,7 @@ class Test(TestCase):
             )
 
     def test_glob_ls_should_use_glob_matching_for_files(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.file_path_1_b_f1_py, self.file_path_3_c_f3_py],
             glob_ls(
                 self.dir_path_b, '**', '*.py',
@@ -96,7 +103,7 @@ class Test(TestCase):
         )
 
     def test_glob_ls_should_use_glob_matching_for_directories(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.dir_path_b, self.dir_path_c],
             glob_ls(
                 self.dir_path_a, '**', '*',
@@ -105,7 +112,7 @@ class Test(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.dir_path_b],
             glob_ls(
                 self.dir_path_a, '**', 'b',
@@ -115,7 +122,7 @@ class Test(TestCase):
         )
 
     def test_glob_ls_should_remove_trailing_separator_from_results(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.dir_path_a, self.dir_path_b, self.dir_path_c],
             glob_ls(
                 # due to ** usage the self.dir_path_a would normally be included with / at the end
@@ -127,7 +134,7 @@ class Test(TestCase):
         )
 
     def test_glob_ls_should_not_use_recursion_by_default(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [self.file_path_1_b_f1_py],
             glob_ls(
                 # with recursive=False the ** acts as *
@@ -138,7 +145,7 @@ class Test(TestCase):
         )
 
     def test_glob_ls_should_return_empty_list_when_nothing_matched(self):
-        self.assertEqual(
+        self.assertEqualAfterSort(
             [],
             glob_ls(
                 os.path.join(self.dir_path_a, '**', 'no-such-file'),
