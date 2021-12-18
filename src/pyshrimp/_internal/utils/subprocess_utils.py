@@ -32,14 +32,25 @@ class _ExecutingProcess:
     def detach_stdout(self):
         self._process.stdout = None
 
+    def send_signal(self, signal):
+        self._process.send_signal(signal)
 
-def _spawn_process(command: Union[str, Iterable], cmd_in=None, cwd=None, env=None, capture_err_output=False) -> _ExecutingProcess:
+    @property
+    def process(self) -> subprocess.Popen:
+        return self._process
+
+    @property
+    def pid(self) -> int:
+        return self._process.pid
+
+
+def _spawn_process(command: Union[str, Iterable], cmd_in=None, cwd=None, env=None, capture_output=False, capture_err_output=False) -> _ExecutingProcess:
     # TODO: support for string stdin?
     # TODO: try catch support
     process = subprocess.Popen(
         command,
         stdin=subprocess.DEVNULL if cmd_in is None else cmd_in,
-        stdout=subprocess.PIPE,
+        stdout=subprocess.PIPE if capture_output else None,
         stderr=subprocess.PIPE if capture_err_output else None,
         # TODO: binary output support
         universal_newlines=True,

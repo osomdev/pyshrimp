@@ -1,5 +1,7 @@
 # noinspection PyProtectedMember
 from pyshrimp._internal.wrapper.mainwrapper import _run as run
+# noinspection PyProtectedMember
+from pyshrimp._internal.wrapper.mainwrapper import _init_logging as init_logging
 from pyshrimp.execution_pipeline.pipeline import pipe, ExecutionPipeline
 from pyshrimp.execution_pipeline.pipeline_api import PipelineExecutionResult
 from pyshrimp.execution_pipeline.pipeline_starter import PIPE, PIPE_END, PIPE_END_STDOUT

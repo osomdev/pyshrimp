@@ -168,7 +168,9 @@ class Command:
             executing_command=_spawn_process(
                 command=self._build_command(),
                 cmd_in=left_out,
-                env=self._build_env()
+                env=self._build_env(),
+                capture_output=self._capture,
+                capture_err_output=self._capture
                 # TODO: other params like check
             )
         )
@@ -177,6 +179,7 @@ class Command:
         return _spawn_process(
             command=self._build_command(),
             env=self._build_env(),
+            capture_output=self._capture,
             capture_err_output=self._capture
             # TODO: other params like check
         )

@@ -41,11 +41,13 @@ class TestScriptRunner(ExtendedTestCase):
         examples = glob_ls(
             # we are in tests/smoke/ and want to be in examples/ -> ../../examples/**/*.py
             os.path.dirname(__file__), os.pardir, os.pardir, 'examples', '**', '*.py',
-            files_only=True
+            files_only=True,
+            recursive=True
         )
 
         for example_script in examples:
-            self._run_example(example_script)
+            if not example_script.endswith('.test_runner.py'):
+                self._run_example(example_script)
 
     def _run_example(self, example_script):
         _log(f'Testing: {example_script}')
@@ -59,9 +61,18 @@ class TestScriptRunner(ExtendedTestCase):
         # some examples use sudo, let's mock it to no-op
         fake_sudo = _get_utils_script_path('fake_sudo.py')
 
+        # use script runner if one exists - some examples require extra execution setup
+        test_runner_path = re.sub(r'\.py$', '.test_runner.py', example_script)
+        if os.path.exists(test_runner_path) and not os.access(test_runner_path, os.X_OK):
+            self.fail(f'Example script have test runner which is NOT executable: {test_runner_path}')
+
+        script_cmd = [test_runner_path, os.path.abspath(example_script)] if os.path.exists(test_runner_path) else [example_script]
+
+        _log(f'Spawning process: {script_cmd}')
+
         # spawn process in background - some scripts use devloop so we should be ready for this
         proc = cmd(
-            example_script,
+            script_cmd,
             env=dict(
                 # execute script with fake sudo - instead of running script we capture the process details
                 PYSHRIMP_SUDO_PATH=fake_sudo,
@@ -75,33 +86,44 @@ class TestScriptRunner(ExtendedTestCase):
         captured_lines = []
 
         def _process_output():
-            for line in proc.stdout:
-                _log(f'=> {line.rstrip()}')
-                captured_lines.append(line.rstrip())
-                if 'Waiting until file changes:' not in line:
-                    continue
+            try:
+                for line in proc.stdout:
+                    _log(f'=> {line.rstrip()}')
+                    captured_lines.append(line.rstrip())
+                    if 'Waiting until file changes:' not in line:
+                        continue
 
-                # script was executed and dev loop is waiting for changes
-                # trigger ctrl+c to stop it
-                proc._process.send_signal(signal.SIGINT)
+                    # script was executed and dev loop is waiting for changes
+                    # trigger ctrl+c to stop it
+                    proc.send_signal(signal.SIGINT)
+
+            except Exception as ex:
+                _log(f'Got exception while reading process output: {ex}')
+
+            finally:
+                _log('Output processing loop completed')
+
+        _log(f'Processing lines of PID:{proc.pid} in background...')
 
         # process the output with timeout
         processing_result = run_with_timeout(
             target=_process_output,
             timeout_sec=30,
-            on_error=lambda: proc._process.send_signal(signal.SIGKILL),
+            on_error=lambda: proc.send_signal(signal.SIGKILL),
             raise_on_timeout=False
         )
 
+        _log(f'after wait for processing, result={processing_result}')
+
         # wait for process termination
         terminate_result = run_with_timeout(
-            target=lambda: proc.close(5),
+            target=lambda: proc.close(1),
             timeout_sec=10,
-            on_error=lambda: proc._process.send_signal(signal.SIGKILL),
+            on_error=lambda: proc.send_signal(signal.SIGKILL),
             raise_on_exception=False
         )
 
-        captured_output = "\n".join(captured_lines) + terminate_result.result.error_output
+        captured_output = "\n".join(captured_lines) + (terminate_result.result.error_output if terminate_result.result else '')
         self.assertFalse(
             terminate_result.timed_out or processing_result.timed_out,
             f'Execution of {example_script} timed out, captured output:\n'
