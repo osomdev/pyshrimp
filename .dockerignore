@@ -1,0 +1,4 @@
+.git/
+.github/
+__local/
+venv/
