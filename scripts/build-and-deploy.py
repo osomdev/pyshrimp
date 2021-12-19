@@ -1,13 +1,16 @@
 #!/usr/bin/env pyshrimp
-# $requires: click==7.0.0
+# $requires: click==7.0.0, requests, beautifulsoup4
 import os
+import re
 import shutil
 import sys
 
 import click
+import requests
+from bs4 import BeautifulSoup
 from click import confirm, style
 
-from pyshrimp import run, log, shell_cmd, StringWrapper, exit_error
+from pyshrimp import run, log, shell_cmd, StringWrapper, exit_error, wait_until
 
 
 def log_s(msg, fg=None, bold=None):
@@ -36,8 +39,30 @@ def post_release_test(release_version, target_env):
     log_s('Preparing for post release test execution...', bold=True, fg='blue')
     shell('docker build -t pyshrimp_post_release_test docker/post_release_test')
 
+    pypi_repo = 'https://test.pypi.org/simple' if target_env == 'staging' else 'https://pypi.org/simple'
+    wait_until(
+        'Module is available for download...',
+        collect=lambda: release_exists('pyshrimp', release_version, pypi_repo),
+        timeout_sec=60,
+        check_interval_sec=1,
+        before_sleep=lambda res: log_s(' * Still not available...'),
+        on_timeout=lambda res: log_s('Module is still not available, test will probably fail', fg='yellow', bold=True)
+    )
+
     log_s('Running post release test...', bold=True, fg='blue')
     shell(f'docker run -t pyshrimp_post_release_test ./run-post-release-test.sh "{release_version}" "{target_env}"')
+
+
+def release_exists(module, version, repository):
+    res = requests.get(f'{repository.rstrip("/")}/{module}')
+    if res.status_code != 200:
+        return False
+
+    for link in BeautifulSoup(res.text, 'html.parser').find_all('a'):
+        if re.match(f'{module}-{version}-py3.*', link.get_text()):
+            return True
+
+    return False
 
 
 @click.command()
@@ -58,11 +83,6 @@ def main(skip_tests, deploy_to_staging, deploy_to_prod, skip_questions, skip_pos
     if skip_questions and (deploy_to_staging is None or deploy_to_prod is None):
         raise exit_error('Illegal arguments - you must decide if you want to use prod and staging deployment when using do not ask option.')
 
-    if skip_tests:
-        log('Skipping tests execution.')
-    else:
-        pre_release_test()
-
     if skip_questions:
         log(f'Preparing to release version {version}')
     else:
@@ -72,6 +92,13 @@ def main(skip_tests, deploy_to_staging, deploy_to_prod, skip_questions, skip_pos
     shell('python3 -m build --help 2>/dev/null >/dev/null || python3 -m pip install --upgrade build')
     shell('python3 -m build')
     shell('python3 -m twine --help 2>/dev/null >/dev/null || python3 -m pip install --upgrade twine')
+
+    # ~~ pre-release tests
+
+    if skip_tests:
+        log('Skipping tests execution.')
+    else:
+        pre_release_test()
 
     # ~~ staging deployment
 

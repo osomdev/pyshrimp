@@ -1,4 +1,4 @@
-__version__ = '0.2.0.dev2'
+__version__ = '0.2.0.dev3'
 
 # noinspection PyProtectedMember
 from pyshrimp._internal.wrapper.mainwrapper import _run as run

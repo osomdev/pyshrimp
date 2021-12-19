@@ -28,5 +28,9 @@ echo "== NEW SCRIPT:"
 cat new-script.py
 echo "---"
 
-# verification script should run fine
-./verify-release-script.py
+if [[ "$target_env" == "production" ]]; then
+  # verification script should run fine
+  ./verify-release-script.py
+else
+  echo "SKIP: Not attempting script execution as it will fail to install PyShrimp outside of production environment"
+fi
