@@ -34,7 +34,9 @@ jobs:
         flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run unit tests
       run: |
+        export TEMP=${{ runner.temp }}
         pytest tests/unit
     - name: Run smoke tests
       run: |
+        export TEMP=${{ runner.temp }}
         pytest tests/smoke
