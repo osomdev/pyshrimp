@@ -10,16 +10,16 @@ import requests
 from bs4 import BeautifulSoup
 from click import confirm, style
 
-from pyshrimp import run, log, shell_cmd, StringWrapper, exit_error, wait_until
+from pyshrimp import run, log, shell_cmd, cmd, StringWrapper, exit_error, wait_until
 
 
 def log_s(msg, fg=None, bold=None):
     log(style(msg, fg=fg, bold=bold))
 
 
-def shell(cmd):
-    log_s(f'Running: {cmd}', fg='blue')
-    shell_cmd(cmd, capture=False, check=True).exec()
+def shell(command_line, check=True, capture=False):
+    log_s(f'Running: {command_line}', fg='blue')
+    return shell_cmd(command_line, capture=capture, check=check).exec()
 
 
 def pre_release_test():
@@ -83,6 +83,11 @@ def main(skip_tests, deploy_to_staging, deploy_to_prod, skip_questions, skip_pos
     if skip_questions and (deploy_to_staging is None or deploy_to_prod is None):
         raise exit_error('Illegal arguments - you must decide if you want to use prod and staging deployment when using do not ask option.')
 
+    is_git_clean = cmd('git').exec('status', '--porcelain=v1').standard_output.strip() == ''
+    if not is_git_clean and not skip_questions:
+        shell('git status')
+        confirm(f'Git repository is not clean, continue?', abort=True)
+
     if skip_questions:
         log(f'Preparing to release version {version}')
     else:
@@ -99,6 +104,12 @@ def main(skip_tests, deploy_to_staging, deploy_to_prod, skip_questions, skip_pos
         log('Skipping tests execution.')
     else:
         pre_release_test()
+
+    # ~~ tag commit
+    if '.dev' in version:
+        log('NOT applying git tag for development version.')
+    else:
+        shell(f'git tag release-{version}')
 
     # ~~ staging deployment
 
