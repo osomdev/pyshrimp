@@ -71,19 +71,20 @@ class ExampleRunner:
         exit_code = 127
         try:
             log(f'--- Running script {self._actual_script}\n\n\n')
-            exit_code = run_process(
+            result = run_process(
                 command=[
                     self._actual_script, f'--services-dir={self._services_root_dir}'
                 ],
                 timeout=15,
                 capture_out=False,
                 capture_err=False
-            ).exit_code
+            )
+            exit_code = result.exit_code
 
             print('\n\n')
 
             if exit_code != 0:
-                exit_error(f'Got unexpected non zero exit code: {exit_code}', exit_code=exit_code)
+                exit_error(f'Got unexpected non zero exit code: {exit_code}. Result: {result}', exit_code=exit_code)
 
             service_supervisor_pid = cmd(['pgrep', '-f', f'supervise {self._service_name}'], check=False).exec().standard_output.strip()
             svscan_pid = cmd(['pgrep', '-f', f'/usr/bin/svscan {self._services_root_dir}'], check=False).exec().standard_output.strip()
