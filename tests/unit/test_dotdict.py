@@ -29,6 +29,15 @@ class Test(TestCase):
         )
         self.assertEqual(42, sut.a.b.c.d)
 
+    def test_dot_dict_should_support_in_condition(self):
+        sut = as_dot_dict(
+            {
+                'a': 42
+            }
+        )
+        self.assertIn('a', sut)
+
+
     def test_dot_dict_should_read_data_from_list_value(self):
         sut = as_dot_dict(
             {

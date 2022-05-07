@@ -11,7 +11,7 @@ def _format_path(path):
         if idx > 0:
             res.append(sep)
 
-        res.append(el_name)
+        res.append(str(el_name))
 
     return ''.join(res)
 
@@ -54,6 +54,9 @@ class DotDict:
             data=data,
             path=path or []
         )
+
+    def __contains__(self, item):
+        return item in self.__dot_dict_state_d40de1e455ae.data
 
     def __getattr__(self, item):
         try:
