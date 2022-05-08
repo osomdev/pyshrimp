@@ -252,12 +252,14 @@ class _ScriptRunnerBootstrap:
     def setup_virtual_env_using_venv(self, venv_dir):
         import venv
         try:
+            self.log(f'Setting up venv using venv')
             venv.create(venv_dir, system_site_packages=True, with_pip=True, clear=True)
         except BaseException:
             raise self.exit_error(f'Failed to setup virtualenv! Check previous messages for details.', exc_info=True)
 
     def setup_virtual_env_using_virtualenv(self, venv_dir):
         command = [sys.executable, '-m', 'virtualenv', '-p', sys.executable, '--clear', venv_dir]
+        self.log(f'Setting up venv using virtualenv: {command}')
         result = subprocess.run(command, stdout=subprocess.PIPE)
         if result.returncode != 0:
             raise self.exit_error(
