@@ -108,7 +108,7 @@ class TestScriptRunner(ExtendedTestCase):
         # process the output with timeout
         processing_result = run_with_timeout(
             target=_process_output,
-            timeout_sec=30,
+            timeout_sec=45,
             on_error=lambda: proc.send_signal(signal.SIGKILL),
             raise_on_timeout=False
         )

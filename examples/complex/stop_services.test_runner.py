@@ -75,7 +75,7 @@ class ExampleRunner:
                 command=[
                     self._actual_script, f'--services-dir={self._services_root_dir}'
                 ],
-                timeout=15,
+                timeout=30,
                 capture_out=False,
                 capture_err=False
             )
