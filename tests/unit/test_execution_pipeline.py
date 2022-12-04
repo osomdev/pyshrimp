@@ -9,8 +9,9 @@ from pyshrimp.exception import IllegalArgumentException
 from pyshrimp.execution_pipeline.pipeline import ExecutionPipeline
 from pyshrimp.execution_pipeline.pipeline_starter import PIPE, PIPE_END, PIPE_END_STDOUT
 from pyshrimp.utils.command import cmd, shell_cmd
+from common.platform_utils import runOnUnixOnly
 
-
+@runOnUnixOnly
 class TestExecutionPipeline(TestCase):
 
     def test_example_object_oriented_syntax(self):

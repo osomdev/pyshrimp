@@ -5,7 +5,7 @@ from pyshrimp import as_dot_dict
 from pyshrimp.utils.dotdict import unwrap_dot_dict
 
 
-class Test(TestCase):
+class TestDotDict(TestCase):
 
     def test_dot_dict_should_read_data_from_dict(self):
         sut = as_dot_dict(

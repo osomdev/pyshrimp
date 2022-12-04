@@ -17,7 +17,7 @@ class _BgFunction:
         return self.result
 
 
-class Test(TestCase):
+class TestParallelUtils(TestCase):
 
     def test_in_background_should_run_function_in_thread(self):
         fn1 = _BgFunction('res1')

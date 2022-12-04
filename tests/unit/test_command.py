@@ -1,7 +1,8 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from pyshrimp.utils.command import shell_cmd, cmd, SkipConfig, Command, CommandArgProcessor
 from pyshrimp.utils.subprocess_utils import ProcessExecutionException
+from common.platform_utils import runOnUnixOnly
 
 
 class _TextWrapper:
@@ -21,7 +22,7 @@ class _PrefixArgumentProcessor(CommandArgProcessor):
     def process_args(self, *args):
         return [f'{self._prefix}{arg}' for arg in args]
 
-
+@runOnUnixOnly
 class TestCommand(TestCase):
 
     def test_cmd(self):

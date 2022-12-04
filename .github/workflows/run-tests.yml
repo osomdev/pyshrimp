@@ -11,31 +11,59 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        include:
+          - os: ubuntu-latest
+            on_ubuntu: 1
+          - os: windows-latest
+            on_windows: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
     - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
+
+    - name: Install dependencies specific for ubuntu
+      if: ${{ matrix.on_ubuntu }}
+      run: sudo apt install daemontools
+
     - name: Install dependencies
       run: |
-        sudo apt install daemontools
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install -e .
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
     - name: Run unit tests
+      if: ${{ matrix.on_ubuntu }}
       run: |
         export TEMP=${{ runner.temp }}
         pytest tests/unit
+
+    - name: Run unit tests (windows)
+      if: ${{ matrix.on_windows }}
+      run: |
+        set TMP=${{ runner.temp }}
+        set TEMP=${{ runner.temp }}
+        pytest tests/unit
+
     - name: Run smoke tests
+      if: ${{ matrix.on_ubuntu }}
       run: |
         export TEMP=${{ runner.temp }}
         pytest tests/smoke

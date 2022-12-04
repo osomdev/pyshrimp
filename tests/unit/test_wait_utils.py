@@ -18,7 +18,7 @@ class MockClock:
         self._time += inc_sec
 
 
-class Test(TestCase):
+class TestWaitUtils(TestCase):
 
     def setUp(self) -> None:
         self._clock = MockClock()

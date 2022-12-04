@@ -1,9 +1,11 @@
 from unittest import TestCase
 
 from pyshrimp.utils.subprocess_utils import run_process, ProcessExecutionException
+from common.platform_utils import runOnUnixOnly
 
 
-class Test(TestCase):
+@runOnUnixOnly
+class TestSubprocessUtils(TestCase):
     def test_run_process_should_return_output(self):
         self.assertEqual(
             '3\n',

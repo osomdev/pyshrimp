@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 from pyshrimp import FileBasedLock
+from common.platform_utils import runOnUnixOnly
 
 
 class _LockTester:
@@ -32,7 +33,7 @@ class _LockTester:
         return self.thread.join()
 
 
-class Test(TestCase):
+class TestLockingUntils(TestCase):
 
     def test_lock_should_be_only_obtainable_once(self):
         with TemporaryDirectory() as temp_dir:
@@ -89,6 +90,7 @@ class Test(TestCase):
                     dict(Counter([t.result for t in testers]).items())
                 )
 
+    @runOnUnixOnly
     def test_lock_should_add_lock_details_to_file(self):
         with TemporaryDirectory() as temp_dir:
             lock_file_path = os.path.join(temp_dir, 'lockfile')

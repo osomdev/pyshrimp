@@ -46,19 +46,20 @@ def glob_ls(*path_glob_segments: str, dirs_only=False, files_only=False, recursi
     )
 
 
-def write_to_file(file_path: str, data: AnyStr, open_mode='w') -> None:
-    with open(file_path, open_mode) as f:
+def write_to_file(file_path: str, data: AnyStr, open_mode='w', encoding='utf-8') -> None:
+    effective_encoding = encoding if 'b' not in open_mode else None
+    with open(file_path, open_mode, encoding=effective_encoding) as f:
         f.write(data)
 
 
-def read_file(file_path: str) -> str:
+def read_file(file_path: str, encoding='utf-8') -> str:
     """
     Read contents of file using text mode.
 
     :param file_path:
     :return:
     """
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding=encoding) as f:
         return f.read()
 
 

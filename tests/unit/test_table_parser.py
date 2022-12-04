@@ -11,7 +11,7 @@ root           4  0.0  0.0      0     0 ?        I<   lis21   0:00
 '''.strip()
 
 
-class Test(TestCase):
+class TestTableParser(TestCase):
 
     def test_parse_table_should_parse_ps_table(self):
         res = parse_table(table_data.split('\n'))

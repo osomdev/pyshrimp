@@ -6,7 +6,7 @@ from pyshrimp.utils.splitter import default_splitter
 data1 = '    a,b  c\t\t\td   e f         g          '
 
 
-class Test(TestCase):
+class TestSplitter(TestCase):
 
     def test_default_splitter_should_split(self):
         self.assertEqual(

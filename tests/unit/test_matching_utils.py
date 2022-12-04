@@ -3,7 +3,7 @@ from unittest import TestCase
 from pyshrimp import re_match_all
 
 
-class Test(TestCase):
+class TestMatchingUtils(TestCase):
 
     def test_should_return_matching_group(self):
         self.assertEqual(

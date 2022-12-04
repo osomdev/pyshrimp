@@ -6,6 +6,7 @@ from unittest import TestCase
 from pyshrimp import glob_ls, write_to_file, read_file, read_file_bin, chmod_set, chmod_unset
 from pyshrimp.exception import IllegalArgumentException
 from pyshrimp.utils.filesystem import ls
+from common.platform_utils import runOnUnixOnly
 
 
 def _make_file(dir_path, file_name):
@@ -20,7 +21,7 @@ def _get_file_mode(file_path):
     return os.stat(file_path).st_mode & 0o7777
 
 
-class Test(TestCase):
+class TestFilesystemUtils(TestCase):
 
     def setUp(self) -> None:
         # {temp_dir}/a/b/
@@ -179,6 +180,7 @@ class Test(TestCase):
         content_read = read_file_bin(file_path)
         self.assertEqual(content, content_read)
 
+    @runOnUnixOnly
     def test_chmod_set_should_set_requested_flags(self):
         # reset mode
         os.chmod(self.file_path_1_b_f1_py, 0)
@@ -192,6 +194,7 @@ class Test(TestCase):
         chmod_set(self.file_path_1_b_f1_py, stat.S_IWGRP)
         self.assertEqual(stat.S_IXUSR | stat.S_IWGRP, _get_file_mode(self.file_path_1_b_f1_py))
 
+    @runOnUnixOnly
     def test_chmod_unset_should_unset_requested_flags(self):
         # set some flags
         os.chmod(
