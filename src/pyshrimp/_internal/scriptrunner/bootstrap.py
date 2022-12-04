@@ -99,7 +99,7 @@ class _ScriptRunnerBootstrap:
                 # for local testing use the dev install approach
                 '-e', os.path.abspath(
                     os.path.join(
-                        os.path.dirname(__file__), '../../../../'
+                        os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, os.pardir
                     )
                 )
             ]
@@ -211,13 +211,25 @@ class _ScriptRunnerBootstrap:
                 else:
                     raise self.exit_error('Failed to setup virtual environment - cannot use venv or virtualenv!')
 
+                pip_executable_path_candidates = [
+                    os.path.join(venv_dir, 'bin', 'pip'),
+                    # windows
+                    os.path.join(venv_dir, 'scripts', 'pip.exe')
+                ]
+
+                pip_executable_path = next(filter(os.path.exists, pip_executable_path_candidates), None)
+                if pip_executable_path is None:
+                    raise self.exit_error(
+                        f'Setup failed - could not locate pip executable among the candidates: {pip_executable_path_candidates}'
+                    )
+
                 if any((req.startswith('-e ') or req == '-e') for req in requirements):
                     # editable mode requested, we need to ensure that pip is fresh enough to support this
                     # solution to: '''A "pyproject.toml" file was found, but editable mode currently requires a setup.py based build.'''
                     self.log(f'Ensuring PIP is in fresh enough version to support editable requirements...')
                     pip_upgrade_result = subprocess.run(
                         [
-                            os.path.join(venv_dir, 'bin/pip'), 'install', 'pip>=21.2.4'
+                            pip_executable_path, 'install', 'pip>=21.2.4'
                         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE
                     )
                     if pip_upgrade_result.returncode != 0:
@@ -230,7 +242,7 @@ class _ScriptRunnerBootstrap:
                             exc_info=True
                         )
 
-                install_requirements_command = [os.path.join(venv_dir, 'bin/pip'), 'install'] + requirements
+                install_requirements_command = [pip_executable_path, 'install'] + requirements
                 self.log(f'Installing requirements: {install_requirements_command}')
                 pip_install_result = subprocess.run(install_requirements_command, stdout=subprocess.PIPE)
 
@@ -246,8 +258,19 @@ class _ScriptRunnerBootstrap:
 
                 self.log(f'Virtual env ready')
 
-        python_executable = os.path.join(venv_dir, 'bin/python')
-        return python_executable
+        python_executable_path_candidates = [
+            os.path.join(venv_dir, 'bin', 'python'),
+            # windows
+            os.path.join(venv_dir, 'scripts', 'python.exe')
+        ]
+
+        python_executable_path = next(filter(os.path.exists, python_executable_path_candidates), None)
+        if python_executable_path is None:
+            raise self.exit_error(
+                f'Setup failed - could not locate python executable among the candidates: {python_executable_path_candidates}'
+            )
+        
+        return python_executable_path
 
     def setup_virtual_env_using_venv(self, venv_dir):
         import venv

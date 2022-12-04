@@ -88,3 +88,29 @@ class Test(TestCase):
                     },
                     dict(Counter([t.result for t in testers]).items())
                 )
+
+    def test_lock_should_add_lock_details_to_file(self):
+        with TemporaryDirectory() as temp_dir:
+            lock_file_path = os.path.join(temp_dir, 'lockfile')
+    
+            lock = FileBasedLock(lock_file_path)
+
+            with lock.acquire_lock() as locked:
+                self.assertTrue(locked)
+
+                with open(lock_file_path, 'r') as f:
+                    lock_file_contents = f.read()
+                    self.assertRegexpMatches(lock_file_contents, 'PID: \d+ THREAD: \d+')
+
+    def test_lock_file_should_be_removed_after_lock_release(self):
+        with TemporaryDirectory() as temp_dir:
+            lock_file_path = os.path.join(temp_dir, 'lockfile')
+    
+            lock = FileBasedLock(lock_file_path)
+
+            with lock.acquire_lock() as locked:
+                self.assertTrue(locked)
+
+                self.assertTrue(os.path.exists(lock_file_path))
+
+            self.assertFalse(os.path.exists(lock_file_path))

@@ -1,58 +1,35 @@
-import fcntl
-import os
 from contextlib import contextmanager
+import platform
+from typing import Type
 
+from pyshrimp._internal.locking.file_based_lock_internal import FileBasedLockInternal
+
+
+def _get_file_based_lock_impl() -> Type[FileBasedLockInternal]:
+    system_id = platform.system().lower()
+
+    if system_id == 'windows':
+        from pyshrimp._internal.locking.file_based_lock_windows import get_file_based_lock_impl_for_windows
+        return get_file_based_lock_impl_for_windows()
+    else:
+        from pyshrimp._internal.locking.file_based_lock_posix import get_file_based_lock_impl_for_posix
+        return get_file_based_lock_impl_for_posix()
+
+
+_FileBasedLockImpl = _get_file_based_lock_impl()
 
 class FileBasedLock:
 
     def __init__(self, lock_file_path):
-        self._lock_file_path = lock_file_path
-        self._lock_fd = None
-
-    def try_lock(self):
-        if self._lock_fd is not None:
-            raise Exception('Cannot lock twice!')
-
-        fd = os.open(
-            self._lock_file_path,
-            os.O_RDWR | os.O_CREAT | os.O_APPEND
+        self._delegate: FileBasedLockInternal = _FileBasedLockImpl(
+            lock_file_path=lock_file_path
         )
 
-        try:
-            fcntl.flock(
-                fd,
-                # obtain exclusive lock, fail if unable to lock
-                fcntl.LOCK_EX | fcntl.LOCK_NB
-            )
-        except (IOError, OSError):
-            # failed to lock
-            os.close(fd)
-            return False
-
-        # let's open file again to erase it and store our PID for reference
-        with open(self._lock_file_path, 'w') as f:
-            f.write(f'PID: {os.getpid()}')
-
-        # lock acquired
-        self._lock_fd = fd
-
-        return True
+    def try_lock(self):
+        return self._delegate.try_lock()
 
     def release_lock(self):
-        self._assert_locked()
-
-        # clear lock file
-        open(self._lock_file_path, 'w').close()
-
-        # release lock
-        fd = self._lock_fd
-        self._lock_fd = None
-        fcntl.flock(fd, fcntl.F_UNLCK)
-        os.close(fd)
-
-    def _assert_locked(self):
-        if self._lock_fd is None:
-            raise Exception('Illegal state: not locked')
+        return self._delegate.release_lock()
 
     @contextmanager
     def acquire_lock(self):
@@ -66,10 +43,6 @@ class FileBasedLock:
 
 @contextmanager
 def acquire_file_lock(lock_file_path):
-    lock = FileBasedLock(lock_file_path)
-    locked = lock.try_lock()
-    try:
+    with FileBasedLock(lock_file_path).acquire_lock() as locked:
         yield locked
-    finally:
-        if locked:
-            lock.release_lock()
+
