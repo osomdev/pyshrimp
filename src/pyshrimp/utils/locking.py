@@ -1,14 +1,12 @@
 from contextlib import contextmanager
-import platform
 from typing import Type
 
 from pyshrimp._internal.locking.file_based_lock_internal import FileBasedLockInternal
+from pyshrimp._internal.utils.platformspecific import running_on_windows
 
 
 def _get_file_based_lock_impl() -> Type[FileBasedLockInternal]:
-    system_id = platform.system().lower()
-
-    if system_id == 'windows':
+    if running_on_windows():
         from pyshrimp._internal.locking.file_based_lock_windows import get_file_based_lock_impl_for_windows
         return get_file_based_lock_impl_for_windows()
     else:

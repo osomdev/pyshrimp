@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import re
+import signal
 import subprocess
 import sys
 import traceback
@@ -11,6 +12,7 @@ import traceback
 import pkg_resources
 
 from pyshrimp._internal.scriptrunner.cli import _handle_cli_maybe
+from pyshrimp._internal.utils.platformspecific import running_on_windows
 from pyshrimp.utils.locking import acquire_file_lock
 
 
@@ -321,8 +323,28 @@ class _ScriptRunnerBootstrap:
         else:
             exec_args = [python_executable, '-u', target_script] + args
 
-        self.log(f'Executing the script: {exec_args}')
-        os.execlp(exec_args[0], *exec_args)
+        if running_on_windows():
+            self._exec_windows_workaround(exec_args)
+
+        else:
+            self.log(f'Executing the script: {exec_args}')
+            os.execlp(exec_args[0], *exec_args)
+
+
+    def _exec_windows_workaround(self, exec_args):
+        self.log(f'Executing the script with subprocess: {exec_args}')
+
+        def _on_sig_int(signum, frame):
+            self.log('Got SIGINT, ignoring (should be also received by child process)')
+
+        signal.signal(signal.SIGINT, _on_sig_int)
+
+        proc = subprocess.Popen(exec_args)
+        proc.wait()
+        
+        self.log(f'Process completed, exit code: {proc.returncode}')
+
+        raise sys.exit(proc.returncode)
 
 
 def _bootstrap():
