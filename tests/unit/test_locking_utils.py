@@ -100,7 +100,7 @@ class Test(TestCase):
 
                 with open(lock_file_path, 'r') as f:
                     lock_file_contents = f.read()
-                    self.assertRegexpMatches(lock_file_contents, 'PID: \d+ THREAD: \d+')
+                    self.assertRegex(lock_file_contents, r'PID: \d+ THREAD: \d+')
 
     def test_lock_file_should_be_removed_after_lock_release(self):
         with TemporaryDirectory() as temp_dir:
