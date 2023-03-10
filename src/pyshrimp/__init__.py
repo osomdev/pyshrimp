@@ -19,3 +19,4 @@ from pyshrimp.utils.parallel import in_background
 from pyshrimp.utils.string_wrapper import StringWrapper
 from pyshrimp.utils.subprocess_utils import run_process, ProcessExecutionException, ProcessExecutionResult
 from pyshrimp.utils.wait import wait_until, wait_until_gen
+from pyshrimp.utils.collections import first_not_null
