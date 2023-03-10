@@ -4,6 +4,7 @@ from typing import Iterable, List, Optional, TextIO, Union, Dict
 # noinspection PyProtectedMember
 from pyshrimp._internal.utils.subprocess_utils import _ExecutingProcess, _spawn_process
 from pyshrimp.execution_pipeline.pipeline_api import PipelineElement, PipelineExecutionResult
+from pyshrimp.utils.collections import first_not_null
 from pyshrimp.utils.string_wrapper import StringWrapper
 from pyshrimp.utils.subprocess_utils import (
     ProcessExecutionResult,
@@ -93,7 +94,8 @@ class Command:
         capture: bool = True,
         argument_processor: CommandArgProcessor = None,
         env: Dict[str, str] = None,
-        env_append: bool = True
+        env_append: bool = True,
+        cwd: Optional[str] = None
     ):
         self._env = env
         self._env_append = env_append
@@ -102,6 +104,7 @@ class Command:
         self._argument_processor = argument_processor or DefaultCommandArgProcessor()
         # by-design we do not use argument processor this list - just cast everything to string to ensure we won't blow up
         self._command = [str(el) for el in command]
+        self._cwd = cwd
 
     def __call__(self, *args, **kwargs):
         return self.exec(*args, **kwargs)
@@ -110,7 +113,8 @@ class Command:
         self, *args, cmd_in=None,
         check: Optional[bool] = None,
         capture: Optional[bool] = None,
-        skip: Union[bool, SkipConfig] = False
+        skip: Union[bool, SkipConfig] = False,
+        cwd: Optional[str] = None
     ) -> ProcessExecutionResult:
 
         command = self._build_command(args)
@@ -126,19 +130,18 @@ class Command:
                 return_code=skip.skipped_code
             )
 
-        _capture = self._capture if capture is None else capture
+        _capture = first_not_null(capture, self._capture)
 
         res = run_process(
             command=command,
             capture_out=_capture,
             capture_err=_capture,
             cmd_in=cmd_in,
-            env=self._build_env()
+            env=self._build_env(),
+            cwd=first_not_null(cwd, self._cwd)
         )
 
-        _check = self._check if check is None else check
-
-        if _check:
+        if first_not_null(check, self._check):
             res.raise_if_not_ok()
 
         return res
@@ -150,9 +153,13 @@ class Command:
 
     def with_args(self, *args):
         return Command(
-            command=self._command + self._argument_processor.process_args(*args),
+            command=self._build_command(args=args),
             check=self._check,
-            capture=self._capture
+            capture=self._capture,
+            argument_processor=self._argument_processor,
+            env=self._env,
+            env_append=self._env_append,
+            cwd=self._cwd,
         )
 
     def __str__(self):
@@ -170,7 +177,8 @@ class Command:
                 cmd_in=left_out,
                 env=self._build_env(),
                 capture_output=self._capture,
-                capture_err_output=self._capture
+                capture_err_output=self._capture,
+                cwd=self._cwd
                 # TODO: other params like check
             )
         )
@@ -180,12 +188,13 @@ class Command:
             command=self._build_command(),
             env=self._build_env(),
             capture_output=self._capture,
-            capture_err_output=self._capture
+            capture_err_output=self._capture,
+            cwd=self._cwd
             # TODO: other params like check
         )
 
 
-def cmd(command: Union[str, List], *args, check=True, capture=True, env: Dict[str, str] = None, env_append=True) -> Command:
+def cmd(command: Union[str, List], *args, check=True, capture=True, env: Dict[str, str] = None, env_append=True, cwd: str = None) -> Command:
     if isinstance(command, str):
         command = [command]
 
@@ -194,15 +203,17 @@ def cmd(command: Union[str, List], *args, check=True, capture=True, env: Dict[st
         check=check,
         capture=capture,
         env=env,
-        env_append=env_append
+        env_append=env_append,
+        cwd=cwd
     )
 
 
-def shell_cmd(script: str, *args: str, check=True, capture=True, env: Dict[str, str] = None, env_append=True) -> Command:
+def shell_cmd(script: str, *args: str, check=True, capture=True, env: Dict[str, str] = None, env_append=True, cwd: str = None) -> Command:
     return Command(
         command=['/bin/bash', '-c', script, 'bash'] + [str(el) for el in args],
         check=check,
         capture=capture,
         env=env,
-        env_append=env_append
+        env_append=env_append,
+        cwd=cwd
     )

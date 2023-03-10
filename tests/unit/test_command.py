@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase, skipIf
 
 from pyshrimp.utils.command import shell_cmd, cmd, SkipConfig, Command, CommandArgProcessor
@@ -90,3 +91,27 @@ class TestCommand(TestCase):
         self.assertEqual(0, res.return_code)
         self.assertEqual('', res.standard_output)
         self.assertEqual('', res.error_output)
+
+    def test_command_should_respect_cwd_argument(self):
+        # grab some known directory
+        dir1 = os.path.dirname(os.path.abspath(__file__))
+        dir2 = os.path.dirname(dir1)
+
+        # run with pre-set cwd
+        pwd1 = cmd('bash', '-c', 'echo -n `pwd`', check=True, capture=True, cwd=dir1)
+        self.assertEqual(dir1, pwd1.exec().standard_output)
+        
+        pwd2 = cmd('bash', '-c', 'echo -n `pwd`', check=True, capture=True, cwd=dir2)
+        self.assertEqual(dir2, pwd2.exec().standard_output)
+
+        # now check with overrides
+        self.assertEqual(dir2, pwd1.exec(cwd=dir2).standard_output)
+        self.assertEqual(dir1, pwd2.exec(cwd=dir1).standard_output)
+
+        # check with default empty and overrides
+        pwd = cmd('bash', '-c', 'echo -n `pwd`')
+        self.assertEqual(dir1, pwd.exec(cwd=dir1).standard_output)
+        self.assertEqual(dir2, pwd.exec(cwd=dir2).standard_output)
+
+        # shell command should also work
+        self.assertEqual(dir2, shell_cmd('echo -n `pwd`', cwd=dir2).exec().standard_output)
