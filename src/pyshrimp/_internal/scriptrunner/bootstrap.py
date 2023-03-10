@@ -244,7 +244,7 @@ class _ScriptRunnerBootstrap:
                             exc_info=True
                         )
 
-                install_requirements_command = [pip_executable_path, 'install'] + requirements
+                install_requirements_command = [pip_executable_path, 'install', '--disable-pip-version-check'] + requirements
                 self.log(f'Installing requirements: {install_requirements_command}')
                 pip_install_result = subprocess.run(install_requirements_command, stdout=subprocess.PIPE)
 
