@@ -91,6 +91,13 @@ where `{hash}` is hash value from the requirements. The environment is created o
 runs of script will use already existing environment. Scripts with exactly the same dependencies will
 re-use single virtual environment.
 
+The `$requirements_file` can be used to load requirements list from external file:
+
+```python
+#!/usr/bin/env pyshrimp
+# $requirements_file: requirements.txt
+```
+
 ### Creation of new script
 
 To quickly create new script just run the `new` command:

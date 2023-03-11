@@ -36,7 +36,19 @@ def _default_env_config():
         cache_dir=os.path.abspath(os.environ.get('PYSHRIMP_CACHE_DIR', None) or os.path.expanduser('~/.cache/pyshrimp'))
     )
 
+def _iter_file_lines(file_path: str):
+    with open(file_path, 'r') as f:
+        for line in f:
+            yield line
 
+def _resolve_path(file_path: str, relative_to: str):
+    if os.path.isabs(file_path):
+        return file_path
+
+    if file_path.startswith('~'):
+        return os.path.expanduser(file_path)
+
+    return os.path.normpath(os.path.join(relative_to, file_path))
 class _ScriptConfig:
 
     def __init__(self):
@@ -93,6 +105,23 @@ class _ScriptRunnerBootstrap:
         parsed = [el.strip() for el in m.group(1).split(',')]
         return [el for el in parsed if el]
 
+    def parse_file_path_opt(self, target_script_path: str, line: str, pattern: str, must_exists: bool):
+        m = re.match(pattern, line.strip())
+        if not m:
+            raise self.exit_error(f'Failed to parse config line: {line.strip()!r}')
+
+        script_dir = os.path.dirname(os.path.abspath(target_script_path))
+        file_path = _resolve_path(
+            file_path=m.group(1).strip(),
+            relative_to=script_dir
+        )
+        
+        if must_exists:
+            if not os.path.exists(file_path):
+                raise self.exit_error(f'Failed to parse config line - file "{file_path}" does not exists: {line.strip()!r}')
+
+        return file_path
+
     def read_script_config(self, target_script) -> _ScriptConfig:
         config = _ScriptConfig()
 
@@ -126,6 +155,11 @@ class _ScriptRunnerBootstrap:
 
                 elif line.startswith('# $requires:'):
                     config.requirements += self.parse_list_opts(line, r'# \$requires:(.*)')
+
+                elif line.startswith('# $requirements_file:'):
+                    config.requirements += [l.strip() for l in _iter_file_lines(
+                        self.parse_file_path_opt(target_script, line, '# \$requirements_file:(.*)', must_exists=True)    
+                    )]
 
         return config
 

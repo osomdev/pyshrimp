@@ -138,6 +138,12 @@ class TestScriptRunner(ExtendedTestCase):
         self.assertEqual('\x1b[32mClick is with us!\x1b[0m\n', res.standard_output)
         self._assert_virtual_env_created_correctly()
 
+    def test_script_with_requirements_file_should_run_correctly(self):
+        res = self._exec_test_script('with_requirements_file.py')
+
+        self.assertEqual('\x1b[32mClick is with us and it was required from external file!\x1b[0m\n', res.standard_output)
+        self._assert_virtual_env_created_correctly()
+
     def test_script_with_magic_and_elevate_should_use_sudo_to_elevate_permissions(self):
         target_script = _get_script_path('with_magic_elevate.py')
         dump_process_info_script = _get_utils_script_path('dump_process_info.py')
