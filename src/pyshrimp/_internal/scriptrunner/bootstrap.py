@@ -36,10 +36,12 @@ def _default_env_config():
         cache_dir=os.path.abspath(os.environ.get('PYSHRIMP_CACHE_DIR', None) or os.path.expanduser('~/.cache/pyshrimp'))
     )
 
+
 def _iter_file_lines(file_path: str):
     with open(file_path, 'r') as f:
         for line in f:
             yield line
+
 
 def _resolve_path(file_path: str, relative_to: str):
     if os.path.isabs(file_path):
@@ -49,6 +51,8 @@ def _resolve_path(file_path: str, relative_to: str):
         return os.path.expanduser(file_path)
 
     return os.path.normpath(os.path.join(relative_to, file_path))
+
+
 class _ScriptConfig:
 
     def __init__(self):
@@ -115,7 +119,7 @@ class _ScriptRunnerBootstrap:
             file_path=m.group(1).strip(),
             relative_to=script_dir
         )
-        
+
         if must_exists:
             if not os.path.exists(file_path):
                 raise self.exit_error(f'Failed to parse config line - file "{file_path}" does not exists: {line.strip()!r}')
@@ -158,7 +162,7 @@ class _ScriptRunnerBootstrap:
 
                 elif line.startswith('# $requirements_file:'):
                     config.requirements += [l.strip() for l in _iter_file_lines(
-                        self.parse_file_path_opt(target_script, line, '# \$requirements_file:(.*)', must_exists=True)    
+                        self.parse_file_path_opt(target_script, line, r'# \$requirements_file:(.*)', must_exists=True)
                     )]
 
         return config
@@ -305,7 +309,7 @@ class _ScriptRunnerBootstrap:
             raise self.exit_error(
                 f'Setup failed - could not locate python executable among the candidates: {python_executable_path_candidates}'
             )
-        
+
         return python_executable_path
 
     def setup_virtual_env_using_venv(self, venv_dir):
@@ -364,7 +368,6 @@ class _ScriptRunnerBootstrap:
             self.log(f'Executing the script: {exec_args}')
             os.execlp(exec_args[0], *exec_args)
 
-
     def _exec_windows_workaround(self, exec_args):
         self.log(f'Executing the script with subprocess: {exec_args}')
 
@@ -375,7 +378,7 @@ class _ScriptRunnerBootstrap:
 
         proc = subprocess.Popen(exec_args)
         proc.wait()
-        
+
         self.log(f'Process completed, exit code: {proc.returncode}')
 
         raise sys.exit(proc.returncode)
