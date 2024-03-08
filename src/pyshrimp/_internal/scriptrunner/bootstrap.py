@@ -160,9 +160,9 @@ class _ScriptRunnerBootstrap:
                 elif line.startswith('# $requires:'):
                     config.requirements += self.parse_list_opts(line, r'# \$requires:(.*)')
 
-                elif line.startswith('# $requirements_file:'):
-                    config.requirements += [l.strip() for l in _iter_file_lines(
-                        self.parse_file_path_opt(target_script, line, r'# \$requirements_file:(.*)', must_exists=True)
+                elif re.match(r'^# \$(requirements_file|requirementsFile|requires_file|requiresFile):.*', line):
+                    config.requirements += [requirementsLine.strip() for requirementsLine in _iter_file_lines(
+                        self.parse_file_path_opt(target_script, line, r'# .*?:(.*)', must_exists=True)
                     )]
 
         return config

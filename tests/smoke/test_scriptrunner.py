@@ -141,7 +141,7 @@ class TestScriptRunner(ExtendedTestCase):
     def test_script_with_requirements_file_should_run_correctly(self):
         res = self._exec_test_script('with_requirements_file.py')
 
-        self.assertEqual('\x1b[32mClick is with us and it was required from external file!\x1b[0m\n', res.standard_output)
+        self.assertEqual('We have modules from external file: click==7.0, yaml==6.0.1, jmespath==1.0.1, numpy==1.26.4\n', res.standard_output)
         self._assert_virtual_env_created_correctly()
 
     def test_script_with_magic_and_elevate_should_use_sudo_to_elevate_permissions(self):

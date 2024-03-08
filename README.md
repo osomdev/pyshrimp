@@ -98,6 +98,8 @@ The `$requirements_file` can be used to load requirements list from external fil
 # $requirements_file: requirements.txt
 ```
 
+It is also possible to use alternative keywords: `$requirementsFile`, `$requires_file`, `$requiresFile`.
+
 ### Creation of new script
 
 To quickly create new script just run the `new` command:
