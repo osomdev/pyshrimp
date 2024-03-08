@@ -9,11 +9,11 @@ import subprocess
 import sys
 import traceback
 
-import pkg_resources
-
 from pyshrimp._internal.scriptrunner.cli import _handle_cli_maybe
 from pyshrimp._internal.utils.platformspecific import running_on_windows
 from pyshrimp.utils.locking import acquire_file_lock
+
+from pyshrimp import __version__ as pyshrimp_version
 
 
 def _running_in_dev_mode():
@@ -137,7 +137,7 @@ class _ScriptRunnerBootstrap:
         else:
             config.requirements += [
                 # in dist mode install version from pip, not older than the current one
-                f'pyshrimp>={pkg_resources.get_distribution("pyshrimp").version}'
+                f'pyshrimp>={pyshrimp_version}'
             ]
 
         with open(target_script, 'r') as f:
