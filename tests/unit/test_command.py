@@ -44,7 +44,7 @@ class TestCommand(TestCase):
     def test_cmd_should_raise_exception_on_error_when_instructed(self):
         exception = None
         try:
-            cmd('/bin/false', check=True).exec()
+            cmd('false', check=True).exec()
         except ProcessExecutionException as ex:
             exception = ex
 

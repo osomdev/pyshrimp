@@ -123,6 +123,7 @@ class TestExecutionPipeline(TestCase):
             | cmd(['/bin/echo', '-n', 'hello world'])
             | cmd(['cat'])
             | cmd(['wc', '-c'])
+            | cmd(['tr', '-d', ' '])  # for macOS as wc prints leading spaces
         ).close().stdout
         self.assertEqual(res, '11\n')
 
@@ -130,6 +131,7 @@ class TestExecutionPipeline(TestCase):
         res = (
             PIPE.text('hello world')
             | cmd(['wc', '-c'])
+            | cmd(['tr', '-d', ' '])  # for macOS as wc prints leading spaces
         ).close().stdout
         self.assertEqual(res, '11\n')
 

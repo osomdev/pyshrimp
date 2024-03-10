@@ -15,7 +15,7 @@ class ExampleRunner:
         self._actual_script = sys.argv[1]
         self._temp_dir = TemporaryDirectory(prefix='pyshrimp_example_stop_services_')
         self._service_name = 'pyshrimp-test-service1-7be86577-98ce-4c7f-9082-2c8075cba980'
-        self._services_root_dir = os.path.join(self._temp_dir.name, 'services')
+        self._services_root_dir = os.path.realpath(os.path.join(self._temp_dir.name, 'services'))
         self._svscan_proc: AsyncResult
 
     def _prepare(self):
@@ -38,7 +38,7 @@ class ExampleRunner:
         # run services with svscan
         # noinspection PyProtectedMember
         self._svscan_proc = in_background(
-            cmd(['/usr/bin/svscan', self._services_root_dir], capture=True, check=False)
+            cmd(['svscan', self._services_root_dir], capture=True, check=False)
         )
 
         # wait until service starts
@@ -59,7 +59,7 @@ class ExampleRunner:
 
         # force-kill any remaining processes
         cmd(['pkill', '-9', '-f', f'supervise {self._service_name}']).exec(check=False)
-        cmd(['pkill', '-9', '-f', f'/usr/bin/svscan {self._services_root_dir}']).exec(check=False)
+        cmd(['pkill', '-9', '-f', f'svscan {self._services_root_dir}']).exec(check=False)
 
         # cleanup temp dir
         self._temp_dir.cleanup()
@@ -87,7 +87,7 @@ class ExampleRunner:
                 exit_error(f'Got unexpected non zero exit code: {exit_code}. Result: {result}', exit_code=exit_code)
 
             service_supervisor_pid = cmd(['pgrep', '-f', f'supervise {self._service_name}'], check=False).exec().standard_output.strip()
-            svscan_pid = cmd(['pgrep', '-f', f'/usr/bin/svscan {self._services_root_dir}'], check=False).exec().standard_output.strip()
+            svscan_pid = cmd(['pgrep', '-f', f'svscan {self._services_root_dir}'], check=False).exec().standard_output.strip()
 
             if svscan_pid:
                 exit_error(f'svscan process did not terminate, pid={svscan_pid}')

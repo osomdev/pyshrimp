@@ -54,7 +54,8 @@ def main(services_dir: str, dry_run: bool, wait_timeout_sec: float):
 
     svscan_process_ids = [
         int(pid) for pid in pgrep(
-            '--uid', user_id, '-f', f'/usr/bin/svscan {services_dir}'
+            '-U', user_id,  # using short -U as --uid is not supported on macOS
+            '-f', f'svscan {services_dir}'
         ).out.lines()
     ]
 
