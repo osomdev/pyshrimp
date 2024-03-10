@@ -323,11 +323,9 @@ Hello world
 This project was developed on **Ubuntu Linux**. It should work with any linux system, but I can imagine the tests
 failing in case some system binaries are missing.
 
-It was not tested on macOS (probably will work fine) and some parts for sure will not work on Windows
-(e.g. shell wrapping is depending on bash).
+The project is also tested on macOS before new version is released.
 
-Feel free to raise bugs found when using this project on macOS - it shouldn't be too hard to address them.
-
+Some parts for sure will not work on Windows (e.g. shell wrapping is depending on bash).
 The author does not have plans to introduce support for Windows but contributions are welcome ;).
 
 ## License
